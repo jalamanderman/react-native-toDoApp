@@ -1,6 +1,5 @@
 import React, {useState} from 'react';
 import {StyleSheet, Text, View, Button, TextInput, FlatList} from 'react-native';
-import ButtonIcon from './components/ButtonIcon';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function App() {
