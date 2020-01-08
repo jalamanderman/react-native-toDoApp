@@ -1,10 +1,28 @@
 import React, {useState} from 'react';
-import {StyleSheet, Text, View, Button, TextInput, FlatList} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {StyleSheet, TextInput, FlatList} from 'react-native';
+import {
+    Container,
+    Header,
+    Content,
+    Text,
+    View,
+    Button,
+    Input,
+    Item,
+    Icon,
+    List,
+    ListItem,
+    Right,
+    Left
+} from 'native-base';
+import {AppLoading} from 'expo';
+import * as Font from 'expo-font';
 
-export default function App() {
+import {Ionicons} from '@expo/vector-icons';
 
-    const [enteredGoal, setEnteredGoal] = useState('test');
+export default function App(props) {
+
+    const [enteredGoal, setEnteredGoal] = useState('');
     const [goals, setGoals] = useState([]);
 
     const handleEnteredGoal = (enteredText) => {
@@ -15,7 +33,7 @@ export default function App() {
         if (enteredGoal.length > 0) {
             setGoals(currentGoals => [
                 ...currentGoals,
-                {id: Math.random().toString() , value: enteredGoal}
+                {id: Math.random().toString(), value: enteredGoal}
             ]);
         }
     };
@@ -25,33 +43,71 @@ export default function App() {
         newArr.splice(newArr.findIndex(item => item.id === toRemove), 1);
         setGoals(newArr);
     };
+    const [isLoadingComplete, setLoadingComplete] = useState(false);
 
-    return (
-        <View style={styles.screenContainer}>
-            <View style={styles.inputContainer}>
-                <TextInput
-                    placeholder={''}
-                    style={styles.input}
-                    onChangeText={handleEnteredGoal}
-                    value={enteredGoal}
-                />
-                <Button style={styles.addButton} onPress={handleAddGoal} title={'Add'}/>
-            </View>
-            <FlatList
-                keyExtractor={(item, index) => item.id}
-                data={goals}
-                renderItem={itemData =>
-                <View style={styles.listItem}>
-                    <Text style={styles.listItemText}>{itemData.item.value}</Text>
-                    <Ionicons name="md-trash" size={20} color="grey" onPress={() => deleteGoal(itemData.item.id)} />
-                </View>}
+    if (!isLoadingComplete && !props.skipLoadingScreen) {
+        return (
+            <AppLoading
+                startAsync={loadResourcesAsync}
+                onError={handleLoadingError}
+                onFinish={() => handleFinishLoading(setLoadingComplete)}
             />
-        </View>
-    );
+        );
+    } else {
+        return (
+            <Container>
+                <Header transparent/>
+                <Content>
+                    <View style={styles.screenContainer}>
+                        <Item rounded>
+                            <Input onChangeText={handleEnteredGoal}
+                                   value={enteredGoal}
+                                   placeholder='  Add an item'/>
+                            <Icon active solid name='add' onPress={handleAddGoal}
+                                  style={{fontSize: 20, color: 'green', paddingRight: 15}}/>
+                        </Item>
+                        <List
+                            keyExtractor={(item, index) => item.id}
+                            dataArray={goals}
+                            renderRow={(item) =>
+                                <ListItem>
+                                    <Left>
+                                        <Text>{item.value}</Text>
+                                    </Left>
+                                    <Right>
+                                        <Icon active solid name='trash'/>
+                                    </Right>
+                                </ListItem>
+                            }>
+                        </List>
+                    </View>
+                </Content>
+            </Container>
+        );
+    }
+}
+
+async function loadResourcesAsync() {
+    await Promise.all([
+        Font.loadAsync({
+            Roboto: require('native-base/Fonts/Roboto.ttf'),
+            Roboto_medium: require('native-base/Fonts/Roboto_medium.ttf'),
+            ...Ionicons.font,
+        }),
+    ]);
+}
+
+function handleLoadingError(error) {
+    console.warn(error);
+}
+
+function handleFinishLoading(setLoadingComplete) {
+    setLoadingComplete(true);
 }
 
 const styles = StyleSheet.create({
     screenContainer: {
+        fontFamily: 'Roboto',
         backgroundColor: '#fff',
         paddingHorizontal: 20,
         justifyContent: 'center',
@@ -67,9 +123,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginRight: 10
     },
-    addButton: {
-
-    },
+    addButton: {},
     listItem: {
         flexDirection: 'row',
         paddingVertical: 10,
@@ -81,7 +135,5 @@ const styles = StyleSheet.create({
         flex: 1,
 
     },
-    listItemDelete: {
-
-    },
+    listItemDelete: {},
 });
